@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis 7 corazones solo para ti</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050308;
+    --surface: rgba(20, 15, 25, 0.6);
+    --surface-hover: rgba(35, 25, 40, 0.9);
+    --text: #ffffff;
+    --text-muted: #a090a0;
+    --border: rgba(255, 255, 255, 0.08);
+    --accent: #ff0055;
+    --accent-glow: rgba(255, 0, 85, 0.4);
+    --font-title: 'Cormorant Garamond', serif;
+    --font-ui: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg);
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(50, 20, 40, 0.4) 0%, transparent 60%),
+      radial-gradient(circle at 50% 100%, rgba(20, 20, 50, 0.4) 0%, transparent 60%);
+    color: var(--text);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* --- HEADER --- */
+  header {
+    text-align: center;
+    padding: 70px 20px 50px;
+    animation: fadeInDown 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  h1 {
+    font-family: var(--font-title);
+    font-size: clamp(2.8rem, 7vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #a090a0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.1));
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  /* --- GRID DE SELECCIÓN --- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 1100px;
+    padding: 0 24px 100px;
+    z-index: 10;
+  }
+
+  .card-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--font-ui);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .card-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 0, 85, 0.15) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .card-btn:hover {
+    transform: translateY(-10px) scale(1.03);
+    border-color: rgba(255, 0, 85, 0.4);
+    background: var(--surface-hover);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-glow);
+  }
+
+  .card-btn:hover::before { opacity: 1; }
+
+  .card-btn span {
+    font-family: var(--font-title);
+    font-size: 1.6rem;
+    font-style: italic;
+    font-weight: 600;
+    margin-bottom: 10px;
+    z-index: 1;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  .card-btn small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 1;
+    font-weight: 600;
+  }
+
+  /* --- MODAL PANTALLA COMPLETA --- */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+    z-index: 100;
+  }
+
+  .modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 200px rgba(0,0,0,1);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .modal-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 30px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .modal-title {
+    font-family: var(--font-title);
+    font-size: 2.2rem;
+    font-style: italic;
+    font-weight: 600;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(-15px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+    text-shadow: 0 2px 15px rgba(0,0,0,0.8);
+  }
+
+  .modal.active .modal-title {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .close-btn {
+    pointer-events: auto;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(10px);
+  }
+
+  .close-btn:hover {
+    background: #fff;
+    color: #000;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 0 20px rgba(255,255,255,0.5);
+  }
+
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  canvas { display: block; }
+
+  /* Texto Central MAI */
+  .center-name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    font-family: var(--font-title);
+    font-size: clamp(5rem, 12vw, 8rem);
+    font-weight: 700;
+    font-style: italic;
+    color: #ffffff;
+    text-shadow: 
+      0 0 20px rgba(255, 255, 255, 0.9), 
+      0 0 40px var(--accent),
+      0 0 80px var(--accent);
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 4px;
+    animation: namePulse 2s ease-in-out infinite alternate;
+  }
+
+  .modal.active .center-name {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    transition-delay: 0.8s;
+  }
+
+  @keyframes namePulse {
+    0% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px var(--accent), 0 0 80px var(--accent); }
+    100% { text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 60px var(--accent), 0 0 120px var(--accent); }
+  }
+
+  /* --- FOOTER --- */
+  footer {
+    margin-top: auto;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    z-index: 10;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  footer span {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-style: italic;
+    color: #fff;
+    letter-spacing: normal;
+    text-transform: none;
+    display: block;
+    margin-top: 8px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 50px 20px 30px; }
+    .grid { grid-template-columns: 1fr; gap: 16px; padding: 0 15px 50px; }
+    .modal-title { font-size: 1.5rem; }
+    .modal-header { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>Mis 7 corazones solo para ti</h1>
+    <p>Toca uno para ver su magia</p>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <footer>
+    Hecho todo por
+    <span>Un brandito</span>
+  </footer>
+
+  <!-- MODAL DE PANTALLA COMPLETA -->
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Corazón</div>
+      <button class="close-btn" id="close-btn">✕</button>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="main-canvas"></canvas>
+      <div class="center-name">MAI</div>
+    </div>
+  </div>
+
+<script>
+// ==========================================
+// CONFIGURACIÓN GENERAL
+// ==========================================
+const canvas = document.getElementById('main-canvas');
+const ctx = canvas.getContext('2d', { alpha: false }); 
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const closeBtn = document.getElementById('close-btn');
+const grid = document.getElementById('grid');
+
+let animId = null;
+let reqId = null;
+let startTime = 0;
+const DURATION_BUILD = 2000; 
+
+let particles = [];
+let centerX = 0;
+let centerY = 0;
+let globalScale = 1;
+
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  
+  ctx.scale(dpr, dpr);
+  centerX = w / 2;
+  centerY = h / 2;
+  globalScale = Math.min(w, h) / 45; 
+}
+window.addEventListener('resize', () => {
+  if (modal.classList.contains('active')) {
+    resizeCanvas();
+    initAnimation(); 
+  }
+});
+
+function getHeartPoint(t, scale = 1) {
+  const x = 16 * Math.pow(Math.sin(t), 3);
+  const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+  return { x: x * scale, y: y * scale };
+}
+
+// ==========================================
+// MENÚ DE SELECCIÓN
+// ==========================================
+const animations = [
+  { id: 'text', title: 'Corazón de Texto', desc: 'I love you' },
+  { id: 'bubbles', title: 'Burbujas de Neón', desc: 'Cristal mágico' },
+  { id: 'wireframe', title: 'Nodos de Neón', desc: 'Geometría del amor' },
+  { id: 'electric', title: 'Neón Eléctrico', desc: 'Latido de energía' },
+  { id: 'matrix', title: 'Lluvia Matrix', desc: 'Código del corazón' },
+  { id: 'laser', title: 'Láser Neón', desc: 'Disparos de luz' },
+  { id: 'fire', title: 'Fuego Rosa', desc: 'Plasma ardiente' }
+];
+
+animations.forEach(anim => {
+  const btn = document.createElement('button');
+  btn.className = 'card-btn';
+  btn.innerHTML = `<span>${anim.title}</span><small>${anim.desc}</small>`;
+  btn.onclick = () => openAnimation(anim.id, anim.title);
+  grid.appendChild(btn);
+});
+
+// ==========================================
+// APERTURA Y CIERRE
+// ==========================================
+function openAnimation(id, title) {
+  animId = id;
+  modalTitle.textContent = title;
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => {
+    resizeCanvas();
+    startTime = performance.now();
+    initAnimation();
+    if (reqId) cancelAnimationFrame(reqId);
+    loop();
+  }, 100);
+}
+
+function closeAnimation() {
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+  if (reqId) cancelAnimationFrame(reqId);
+  reqId = null;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+closeBtn.addEventListener('click', closeAnimation);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.classList.contains('active')) closeAnimation();
+});
+
+// ==========================================
+// INICIALIZACIÓN DE PARTÍCULAS
+// ==========================================
+function initAnimation() {
+  particles = [];
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+  if (animId === 'text') {
+    const phrases = ["I love you", "Te quiero", "Eres magia", "Mi amor"];
+    for (let t = 0; t < Math.PI * 2; t += 0.07) {
+      const p = getHeartPoint(t, globalScale);
+      particles.push({
+        tx: centerX + p.x,
+        ty: centerY + p.y,
+        x: centerX + (Math.random() - 0.5) * 800,
+        y: centerY + (Math.random() - 0.5) * 800,
+        text: phrases[Math.floor(Math.random() * phrases.length)],
+        angle: t
+      });
+    }
+  } 
+  // Burbujas de Neón (Colores cambiados a Morado y Dorado)
+  else if (animId === 'bubbles') {
+    for (let t = 0; t < Math.PI * 2; t += 0.04) {
+      const p = getHeartPoint(t, globalScale);
+      particles.push({
+        tx: centerX + p.x,
+        ty: centerY + p.y,
+        x: centerX + (Math.random() - 0.5) * 100, 
+        y: centerY + (Math.random() - 0.5) * 100,
+        size: Math.random() * 12 + 4,
+        angle: t,
+        color: Math.random() > 0.5 ? 'rgba(180, 0, 255, 0.8)' : 'rgba(255, 215, 0, 0.8)',
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  else if (animId === 'wireframe') {
+    const points = [];
+    const steps = 80;
+    for (let i = 0; i < steps; i++) {
+      const t = (i / steps) * Math.PI * 2;
+      const p = getHeartPoint(t, globalScale);
+      points.push({ x: centerX + p.x, y: centerY + p.y });
+    }
+    
+    for (let i = 0; i < steps; i++) {
+      const p1 = points[i];
+      const p2 = points[(i + Math.floor(steps/2)) % steps];
+      const p3 = points[(i + Math.floor(steps/3)) % steps];
+      
+      particles.push({ x1: centerX, y1: centerY, x2: centerX, y2: centerY, tx1: p1.x, ty1: p1.y, tx2: p2.x, ty2: p2.y });
+      particles.push({ x1: centerX, y1: centerY, x2: centerX, y2: centerY, tx1: p1.x, ty1: p1.y, tx2: p3.x, ty2: p3.y });
+    }
+  }
+  else if (animId === 'matrix') {
+    const fontSize = 18;
+    const cols = Math.floor(window.innerWidth / fontSize);
+    // CAMBIO: Ahora dice MAI
+    const chars = "I LOVE YOU TE QUIERO AMOR 愛 心 MAI";
+    
+    for (let i = 0; i < cols; i++) {
+      particles.push({
+        x: i * fontSize + fontSize/2,
+        y: Math.random() * -window.innerHeight,
+        speed: Math.random() * 5 + 3,
+        char: chars[Math.floor(Math.random() * chars.length)]
+      });
+    }
+  }
+  else if (animId === 'laser') {
+    const steps = 100;
+    for (let i = 0; i < steps; i++) {
+      const t = (i / steps) * Math.PI * 2;
+      const p = getHeartPoint(t, globalScale);
+      particles.push({
+        tx: centerX + p.x,
+        ty: centerY + p.y,
+        angle: t,
+        delay: Math.random() * 500
+      });
+    }
+  }
+  // Fuego Rosa (Colores cambiados a Plasma Morado/Azul)
+  else if (animId === 'fire') {
+    for (let t = 0; t < Math.PI * 2; t += 0.03) {
+      const p = getHeartPoint(t, globalScale);
+      const r = 0.9 + Math.random() * 0.2;
+      particles.push({
+        tx: centerX + p.x * r,
+        ty: centerY + p.y * r,
+        x: centerX + (Math.random() - 0.5) * 50,
+        y: centerY + 200, 
+        size: Math.random() * 15 + 5,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 2 + 1
+      });
+    }
+  }
+}
+
+// ==========================================
+// BUCLE DE RENDERIZADO
+// ==========================================
+function loop(time) {
+  if (!modal.classList.contains('active')) return;
+
+  let progress = Math.min((time - startTime) / DURATION_BUILD, 1);
+  let easeProgress = 1 - Math.pow(1 - progress, 4); 
+
+  // Estelas cinematográficas
+  if (animId === 'matrix') {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; 
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+  } else {
+    ctx.fillStyle = "#050308"; 
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+  }
+
+  const timeSec = time / 1000;
+  
+  ctx.globalCompositeOperation = 'lighter';
+
+  // 1. TEXTO
+  if (animId === 'text') {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "bold 14px 'Inter', sans-serif";
+    
+    particles.forEach(p => {
+      const cx = p.x + (p.tx - p.x) * easeProgress;
+      const cy = p.y + (p.ty - p.y) * easeProgress;
+      
+      const floatX = Math.sin(timeSec * 2 + p.angle) * 3 * progress;
+      const floatY = Math.cos(timeSec * 2 + p.angle) * 3 * progress;
+
+      ctx.shadowColor = "#ff6b9d";
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = `rgba(255, 182, 193, ${0.6 + Math.sin(timeSec * 4 + p.angle)*0.4})`;
+      ctx.fillText(p.text, cx + floatX, cy + floatY);
+    });
+  }
+  
+  // 2. BURBUJAS DE NEÓN (Cristal Morado/Dorado)
+  else if (animId === 'bubbles') {
+    particles.forEach(p => {
+      const cx = p.x + (p.tx - p.x) * easeProgress;
+      const cy = p.y + (p.ty - p.y) * easeProgress;
+
+      // Flotación suave
+      const floatX = Math.sin(timeSec * 2 + p.phase) * 5 * progress;
+      const floatY = Math.cos(timeSec * 2 + p.phase) * 5 * progress;
+
+      // Dibujar la burbuja
+      ctx.beginPath();
+      ctx.arc(cx + floatX, cy + floatY, p.size, 0, Math.PI * 2);
+      
+      // Borde brillante
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Relleno translúcido
+      ctx.fillStyle = p.color.replace('0.8', '0.1');
+      ctx.fill();
+    });
+  }
+
+  // 3. NODOS DE NEÓN
+  else if (animId === 'wireframe') {
+    ctx.lineWidth = 1.2;
+    
+    particles.forEach(p => {
+      const cx1 = p.x1 + (p.tx1 - p.x1) * easeProgress;
+      const cy1 = p.y1 + (p.ty1 - p.y1) * easeProgress;
+      const cx2 = p.x2 + (p.tx2 - p.x2) * easeProgress;
+      const cy2 = p.y2 + (p.ty2 - p.y2) * easeProgress;
+
+      ctx.strokeStyle = `rgba(255, 0, 50, ${0.4 + Math.sin(timeSec*2)*0.2})`;
+      ctx.shadowColor = "#ff0033";
+      ctx.shadowBlur = 15;
+
+      ctx.beginPath();
+      ctx.moveTo(cx1, cy1);
+      ctx.lineTo(cx2, cy2);
+      ctx.stroke();
+    });
+  }
+
+  // 4. NEÓN ELÉCTRICO
+  else if (animId === 'electric') {
+    const pulse = 1 + Math.sin(timeSec * 8) * 0.05;
+    const glitch = Math.random() > 0.95 ? Math.random() * 10 - 5 : 0;
+
+    ctx.save();
+    ctx.translate(centerX + glitch, centerY + glitch);
+    ctx.scale(pulse, pulse);
+
+    ctx.beginPath();
+    for (let t = 0; t <= Math.PI * 2; t += 0.05) {
+      const p = getHeartPoint(t, globalScale);
+      if (t === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.closePath();
+
+    ctx.shadowColor = "#ff0055";
+    ctx.shadowBlur = 40;
+    ctx.strokeStyle = "#ff0055";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.shadowBlur = 20;
+    ctx.strokeStyle = "#ff66b2";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // 5. LLUVIA MATRIX
+  else if (animId === 'matrix') {
+    ctx.font = "bold 16px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    
+    particles.forEach(p => {
+      if (progress === 1) {
+        p.y += p.speed;
+        if (p.y > window.innerHeight + 100) {
+          p.y = -100;
+          p.x = Math.random() * window.innerWidth;
+        }
+      }
+      const actualY = p.y * easeProgress;
+      
+      ctx.fillStyle = "rgba(0, 50, 150, 0.3)"; 
+      ctx.shadowBlur = 0;
+      ctx.fillText(p.char, p.x, actualY);
+    });
+
+    ctx.save();
+    ctx.beginPath();
+    for (let t = 0; t <= Math.PI * 2; t += 0.05) {
+      const p = getHeartPoint(t, globalScale);
+      if (t === 0) ctx.moveTo(centerX + p.x, centerY + p.y);
+      else ctx.lineTo(centerX + p.x, centerY + p.y);
+    }
+    ctx.closePath();
+    ctx.clip(); 
+
+    particles.forEach(p => {
+      const actualY = p.y * easeProgress;
+      ctx.fillStyle = "#00ffff";
+      ctx.shadowColor = "#00ffff";
+      ctx.shadowBlur = 20; 
+      ctx.fillText(p.char, p.x, actualY);
+    });
+    ctx.restore();
+  }
+
+  // 6. LÁSER NEÓN
+  else if (animId === 'laser') {
+    particles.forEach(p => {
+      const currentX = centerX + (p.tx - centerX) * easeProgress;
+      const currentY = centerY + (p.ty - centerY) * easeProgress;
+
+      const shoot = Math.max(0, Math.sin(timeSec * 5 + p.angle));
+      
+      ctx.strokeStyle = `rgba(0, 255, 255, ${shoot})`;
+      ctx.shadowColor = "#00ffff";
+      ctx.shadowBlur = 15;
+      ctx.lineWidth = 2 + shoot * 2;
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(currentX, currentY);
+      ctx.stroke();
+
+      if (shoot > 0.8) {
+        ctx.beginPath();
+        ctx.arc(currentX, currentY, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+      }
+    });
+  }
+
+  // 7. FUEGO ROSA (Plasma Morado/Azul)
+  else if (animId === 'fire') {
+    particles.forEach(p => {
+      const cx = p.x + (p.tx - p.x) * easeProgress;
+      const cy = p.y + (p.ty - p.y) * easeProgress;
+
+      // Movimiento de llama
+      if (progress === 1) {
+        p.ty -= p.speed;
+        if (p.ty < centerY - 200) p.ty = centerY + 200;
+      }
+
+      // Parpadeo (Flicker) rápido
+      const flicker = 0.3 + Math.random() * 0.7;
+      
+      // Color del fuego (Morado y Azul)
+      const color = Math.random() > 0.5 ? '180, 0, 255' : '0, 150, 255';
+      
+      ctx.fillStyle = `rgba(${color}, ${flicker})`;
+      
+      ctx.beginPath();
+      ctx.arc(cx + Math.sin(timeSec * 10 + p.phase) * 5, cy, p.size * flicker, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  ctx.globalCompositeOperation = 'source-over';
+  reqId = requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
